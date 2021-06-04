@@ -1,10 +1,9 @@
 FROM python:3.9-slim
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+
 RUN \
   mkdir /src && \
-  cd /src && \
-  pip install --upgrade pip && \
+  cd src && \
+  pip install -U pip && \
   pip install \
   django \
   graphene-django \
@@ -13,8 +12,9 @@ RUN \
   django-cors-headers \
   django-filter \
   django-graphql-jwt \
+  pyjwt==1.7.0 \
   python-decouple \
   psycopg2-binary \
   gunicorn
 
-WORKDIR /src
+CMD [ "/bin/bash" ]
