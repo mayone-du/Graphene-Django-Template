@@ -1,13 +1,15 @@
 import graphene
-from graphene_django.types import DjangoObjectType
-from .models import User, Profile, Task, TestModel
-from graphene_django.filter import DjangoFilterConnectionField
-from graphene import relay
-from graphql_relay import from_global_id
-from graphql_jwt.decorators import login_required
-from django.contrib.auth import get_user_model
 import graphql_jwt
+from django.contrib.auth import get_user_model
+from graphene import relay
+from graphene_django.filter import DjangoFilterConnectionField
+from graphene_django.types import DjangoObjectType
 from graphene_file_upload.scalars import Upload
+from graphql_jwt.decorators import login_required
+from graphql_relay import from_global_id
+
+from .models import Profile, Task, TestModel, User
+
 
 class UserNode(DjangoObjectType):
     class Meta:
@@ -20,7 +22,7 @@ class UserNode(DjangoObjectType):
         interfaces = (relay.Node,)
 
 
-class UserCreateMutation(relay.ClientIDMutation):
+class CreateUserMutation(relay.ClientIDMutation):
     class Input:
         username = graphene.String(required=False)
         email = graphene.String(required=True)
@@ -36,7 +38,7 @@ class UserCreateMutation(relay.ClientIDMutation):
         user.set_password(input.get('password'))
         user.save()
 
-        return UserCreateMutation(user=user)
+        return CreateUserMutation(user=user)
 
 
 class ProfileNode(DjangoObjectType):
@@ -80,7 +82,7 @@ class TaskNode(DjangoObjectType):
 
 
 class TaskCreateMutation(relay.ClientIDMutation):
-# class TaskCreateMutation(graphene.Mutation):
+    # class TaskCreateMutation(graphene.Mutation):
     class Input:
         title = graphene.String(required=True)
         content = graphene.String(required=False)
@@ -107,7 +109,8 @@ class TaskCreateMutation(relay.ClientIDMutation):
         # task.thumbnail = Task.thumbnail
         # task.create_user = User.objects.get(id='VXNlck5vZGU6MQ==')
         # task.create_user = User.objects.get(id=from_global_id(input.get('create_user'))[1])
-        task.create_user = User.objects.get(id=from_global_id(input.get('create_user'))[1])
+        task.create_user = User.objects.get(
+            id=from_global_id(input.get('create_user'))[1])
         task.save()
 
         return TaskCreateMutation(task=task)
@@ -117,11 +120,12 @@ class TaskCreateMutation(relay.ClientIDMutation):
 class TestModelNode(DjangoObjectType):
     class Meta:
         model = TestModel
+
+
 class TestMutation(graphene.Mutation):
     class Arguments:
         file = Upload()
         text = graphene.String(required=True)
-
 
     test = graphene.Field(TestModelNode)
     success = graphene.Boolean()
@@ -135,7 +139,6 @@ class TestMutation(graphene.Mutation):
         return TestMutation(success=True)
 
 
-
 # class TaskCreateMutation(graphene.Mutation):
 # # class TaskCreateMutation(graphene.Mutation):
 #     class Arguments:
@@ -147,7 +150,7 @@ class TestMutation(graphene.Mutation):
 #         id = graphene.ID(required=False)
 
 #     success = graphene.Boolean()
-#     task = graphene.Field(TaskNode)    
+#     task = graphene.Field(TaskNode)
 
 #     def mutate(self, info, thumbnail, title, content, is_completed, create_user, id):
 #         # task = Task.objects.get(pk=from_global_id(id)[1])
@@ -165,7 +168,7 @@ class TestMutation(graphene.Mutation):
     # def mutate_and_get_payload(root, info, **input):
 
         # task = Task(
-            # title=input.get('title'),
+        # title=input.get('title'),
         # )
 
         # task.content = input.get('content')
@@ -225,7 +228,7 @@ class TaskDeleteMutation(relay.ClientIDMutation):
 
 
 class Mutation(graphene.ObjectType):
-    create_user = UserCreateMutation.Field()
+    create_user = CreateUserMutation.Field()
     create_profile = ProfileCreateMutation.Field()
     token_auth = graphql_jwt.ObtainJSONWebToken.Field()
     refresh_token = graphql_jwt.Refresh.Field()
@@ -254,4 +257,3 @@ class Query(graphene.ObjectType):
     @login_required
     def resolve_all_profiles(self, info, **kwargs):
         return Profile.objects.all()
-
