@@ -242,7 +242,7 @@ class Query(graphene.ObjectType):
 
     @login_required
     def resolve_user(self, info, **kwargs):
-        email = kwargs.get('email')
+        id = kwargs.get('id')
         return get_user_model().objects.get(id=from_global_id(id)[1])
 
     @login_required
