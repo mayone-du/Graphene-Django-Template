@@ -1,6 +1,7 @@
 import graphene
 import graphql_jwt
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
 from graphene import relay
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
@@ -68,6 +69,13 @@ class ProfileCreateMutation(relay.ClientIDMutation):
 
         return ProfileCreateMutation(profile=profile)
 
+
+class SendEmail(relay.ClientIDMutation):
+    ok = graphene.Boolean()
+    @staticmethod
+    def mutate(root, info):
+        ok = True
+        return SendEmail(ok=ok)
 
 class Mutation(graphene.ObjectType):
     create_user = CreateUserMutation.Field()

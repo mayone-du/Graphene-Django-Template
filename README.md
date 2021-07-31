@@ -5,6 +5,9 @@ app 内はアプリ用のサンプル
 
 ## セットアップ
 
+- pipenv --python 3.9
+- pipenv install hoge...
+- pip freeze > requirements.txt
 - docker-compose up --build
 - docker-compose exec app bash
 - cd src

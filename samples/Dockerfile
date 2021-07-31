@@ -1,23 +1,15 @@
-FROM python:3.9-slim
+FROM python:3.9.6-slim
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+
+WORKDIR /workspace
+
+COPY requirements.txt /workspace/
 
 RUN \
-  mkdir /src && \
-  cd src && \
-  pip install -U pip && \
-  pip install \
-  django \
-  graphene-django \
-  graphene-file-upload \
-  pillow \
-  django-cors-headers \
-  django-filter \
-  django-graphql-jwt \
-  pyjwt==1.7.0 \
-  python-decouple \
-  dj-database-url \
-  cloudinary \
-  django-cloudinary-storage \
-  psycopg2-binary \
-  gunicorn
-
-CMD [ "/bin/bash" ]
+  # pip自体のアップグレード
+  pip install --upgrade pip && \
+  # requirements.txtからパッケージをインストール
+  pip install -r requirements.txt
