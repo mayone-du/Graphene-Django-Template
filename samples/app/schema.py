@@ -2,6 +2,7 @@ import graphene
 import graphql_jwt
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
+from django.core.signing import dumps, loads
 from graphene import relay
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
@@ -37,10 +38,34 @@ class CreateUserMutation(relay.ClientIDMutation):
         )
         user.username = input.get('username')
         user.set_password(input.get('password'))
+        token = dumps(user.pk)
+        send_mail(subject='サンプルアプリ | 本登録のお知らせ', message=f'ユーザー作成時にメール送信しています\n{token}' + input.get('email'), from_email="sample@email.com",
+            recipient_list=[input.get('email')], fail_silently=False)
+
         user.save()
 
         return CreateUserMutation(user=user)
 
+
+
+# メールでの本登録
+class UpdateUserMutation(relay.ClientIDMutation):
+    class Input:
+        token = graphene.String(required=True)
+    ok = graphene.Boolean()
+
+    @staticmethod
+    def mutate(root, info, **kwargs):
+        token = kwargs.get('token')
+        # 受け取ったトークンからユーザーIDを取得
+        user_pk = loads(token)
+        user = get_user_model().objects.get(pk=user_pk)
+        # ユーザーが存在しなかったらエラー
+        if user is None:
+            raise
+        # TODO: userのis_activeをTrueにする
+        ok = True
+        return UpdateUserMutation(ok=ok)
 
 class ProfileNode(DjangoObjectType):
     class Meta:

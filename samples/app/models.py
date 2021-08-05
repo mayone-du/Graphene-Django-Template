@@ -30,8 +30,10 @@ class UserManager(BaseUserManager):
         return user
 
 
+# ユーザー
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=50, unique=True)
+    # TODO: ↓ユーザーの本登録をメール認証にするのであればデフォルトはFalseがいいかも
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     first_name = models.CharField(max_length=50, blank=True, null=True)
