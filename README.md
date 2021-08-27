@@ -1,18 +1,20 @@
 # 概要
 
-app 内はアプリ用のサンプル
+api 内はアプリ用のサンプル
 それ以外はプロジェクト用のサンプル
 
 ## セットアップ
 
-- pipenv --python 3.9
-- pipenv install hoge...
-- pip freeze > requirements.txt
+クローン後、下記コマンドを順に実行
+
+- pipenv shell
+- pipenv install --dev
+<!-- - pip freeze > requirements.txt -->
 - docker-compose up --build
 - docker-compose exec app bash
-- cd src
-- django-admin startproject sampleproject .
-- python manage.py startapp sampleapp
+- django-admin startproject project .
+  .env に SECRET_KEY などを色々設定
+- python manage.py startapp api
 - python manage.py makemigrations
 - python manage.py migrate
 - python manage.py createsuperuser
@@ -31,8 +33,11 @@ CLOUDINARY_API_SECRET
 
 EMAIL_HOST
 EMAIL_HOST_USER
-EMAIL_HOST_PASSWOR=
+EMAIL_HOST_PASSWOR
 EMAIL_PORT
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
 
 ## デプロイ（Heroku）
 
