@@ -15,6 +15,7 @@ api 内はアプリ用のサンプル
 - django-admin startproject project .
   .env に SECRET_KEY などを色々設定
 - python manage.py startapp api
+  api という名前のアプリを作ったら、project/settings.py の api 部分のコメントを解除し、api で models を定義
 - python manage.py makemigrations
 - python manage.py migrate
 - python manage.py createsuperuser
