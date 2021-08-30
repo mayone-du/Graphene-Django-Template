@@ -18,6 +18,8 @@ graphene-file-upload = "*"
 pillow = "*"
 psycopg2-binary = "*"
 python-decouple = "*"
+channels = "*"
+graphql-ws = "*"
 
 [dev-packages]
 flake8 = "*"

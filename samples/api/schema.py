@@ -1,3 +1,5 @@
+import asyncio
+
 import graphene
 import graphql_social_auth
 from django.contrib.auth import get_user_model
@@ -68,3 +70,11 @@ class Query(graphene.ObjectType):
     def resolve_all_users(self, info, **kwargs):
         return get_user_model().objects.all()
 
+class Subscription(graphene.ObjectType):
+    count_seconds = graphene.Float(up_to=graphene.Int())
+
+    async def resolve_count_seconds(root, info, up_to):
+        for i in range(up_to):
+            yield i
+            await asyncio.sleep(1.)
+        yield up_to
