@@ -33,21 +33,28 @@ class TaskNode(DjangoObjectType):
         }
         interfaces = (relay.Node,)
 
+# タスクの作成
 class CreateTaskMutation(relay.ClientIDMutation):
     class Input:
         title = graphene.String(required=True)
+        content = graphene.String(required=False)
         task_image = Upload(required=False)
     
     task = graphene.Field(TaskNode)
 
     @validate_token
     def mutate_and_get_payload(root, info, **input):
-        current_user = get_user_model().objects.get(email=input.get('login_user_email'))
-        task  = Task(
-            create_user=current_user.id,
-            title=input.get('title'),
-        )
-        return CreateTaskMutation(task=task)
+        try:
+            current_user = get_user_model().objects.get(email=input.get('login_user_email'))
+            task = Task(
+                create_user=current_user.id,
+                title=input.get('title'),
+            )
+            if input.get('content') is not None:
+                task.content = input.get('content')
+            return CreateTaskMutation(task=task)
+        except:
+            raise
 
 
 

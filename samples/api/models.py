@@ -54,14 +54,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Task(models.Model):
     create_user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, related_name='target_user',
+        settings.AUTH_USER_MODEL, related_name='create_user',
         on_delete=models.CASCADE
     )
-    title = models.CharField(max_length=1000, default='',null=False, blank=False)
+    title = models.CharField(max_length=100, default='',null=False, blank=False)
+    content = models.CharField(max_length=1000, default='',null=True, blank=True)
     task_image = models.ImageField(
         blank=True, null=True, upload_to=upload_task_path)
     is_done = models.BooleanField(null=False, blank=False, default=False)
     created_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.create_user
+        return self.title
