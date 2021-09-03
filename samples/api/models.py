@@ -11,21 +11,37 @@ def upload_task_path(instance, filename):
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, username, email, password=None):
+    def create_user(
+        self,
+        **kwargs,
+    ):
         try:
+            email = kwargs.get('email')
+            username = kwargs.get('username')
+            password = kwargs.get('password')
             if not email:
                 raise ValueError('email is must')
-            user = self.model(email=self.normalize_email(email))
-            if username is not None:
-                user.username = username
+            user = self.model(email=self.normalize_email(email),
+                              username=username)
             user.set_password(password)
             user.save(using=self._db)
-            # ユーザー作成時にメールを送信
-            send_mail(subject='サンプルアプリ | 本登録のお知らせ', message=f'ユーザー作成時にメール送信しています' + email, from_email="sample@email.com",
-                recipient_list=[email], fail_silently=False)
+            # ユーザー作成時にメールを送信 superuser作成時はコメントアウト
+            send_mail(subject='サンプルアプリ | 本登録のお知らせ',
+                      message=f'ユーザー作成時にメール送信しています' + email,
+                      from_email="sample@email.com",
+                      recipient_list=[email],
+                      fail_silently=False)
             return user
         except:
             raise ValueError('create_user_error')
+
+    def create_superuser(self, email, password):
+        user = self.create_user(email, password)
+        user.is_staff = True
+        user.is_superuser = True
+        user.save(using=self._db)
+        return user
+
 
     def create_superuser(self, email, password):
         user = self.create_user(email, password)
