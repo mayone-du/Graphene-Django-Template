@@ -67,9 +67,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
+# ユーザーに1対1で紐づくプロフィール
+class Profile(models.Model):
+    related_user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        related_name='related_user',
+        on_delete=models.CASCADE
+    )
+    # 自己紹介
+    self_introduction = models.CharField(max_length=1000, null=True, blank=True)
 
+
+# タスク
 class Task(models.Model):
-    create_user = models.OneToOneField(
+    create_user = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name='create_user',
         on_delete=models.CASCADE
     )
