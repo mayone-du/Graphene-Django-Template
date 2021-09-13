@@ -29,7 +29,9 @@ class UserNode(DjangoObjectType):
 class ProfileNode(DjangoObjectType):
     class Meta:
         model = Profile
-        filter_fields = ['exact', 'icontains']
+        filter_fields = {
+            'self_introduction': ['exact', 'icontains'],
+        }
         interfaces = (relay.Node,)
 
 
@@ -63,12 +65,26 @@ class CreateTaskMutation(relay.ClientIDMutation):
                 task.content = input.get('content')
             return CreateTaskMutation(task=task)
         except:
-            raise
+            raise ValueError('create task error')
 
+# タスクの削除
+class DeleteTaskMutation(relay.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
 
+    task = graphene.Field(TaskNode)
+
+    @validate_token
+    def mutate_and_get_payload(root, info, **input):
+        task = Task.objects.get(id=from_global_id(id)[1])
+        task.delete()
+        return DeleteTaskMutation(task=task)
 
 class Mutation(graphene.ObjectType):
     social_auth = graphql_social_auth.SocialAuth.Field()
+
+    create_task = CreateTaskMutation.Field()
+    delete_task = DeleteTaskMutation.Field()
 
 
 class Query(graphene.ObjectType):
