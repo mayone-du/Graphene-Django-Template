@@ -119,8 +119,9 @@ class Mutation(graphene.ObjectType):
 class Query(graphene.ObjectType):
     user = graphene.Field(UserNode, id=graphene.NonNull(graphene.ID))
     all_users = DjangoFilterConnectionField(UserNode)
-
     request_user = graphene.Field(UserNode)
+
+    task = graphene.Field(TaskNode, id=graphene.NonNull(graphene.ID))
 
     def resolve_user(self, info, **kwargs):
         id = kwargs.get('id')
@@ -134,6 +135,11 @@ class Query(graphene.ObjectType):
         # ↓デコレーターで追加されたemailにアクセス
         email = info.context.user.email
         return get_user_model().objects.get(email=email)
+    
+    @validate_token
+    def resolve_task(self, info, **kwargs):
+        id = kwargs.get('id')
+        return Task.objects.get(id=from_global_id(id)[1])
 
 class Subscription(graphene.ObjectType):
     count_seconds = graphene.Float(up_to=graphene.Int())
