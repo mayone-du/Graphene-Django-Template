@@ -67,6 +67,34 @@ class CreateTaskMutation(relay.ClientIDMutation):
         except:
             raise ValueError('create task error')
 
+
+# タスクの更新
+class UpdateTaskMutation(relay.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+        title = graphene.String(required=True)
+
+    task = graphene.Field(TaskNode)
+
+    @validate_token
+    def mutate_and_get_payload(root, info, **input):
+        id = input.get('id')
+        title = input.get('title')
+        content = input.get('content')
+        is_done = input.get('is_done')
+
+        task = Task.objects.get(id=from_global_id(id)[1])
+
+        if title is not None:
+            task.title = title
+        if content is not None:
+            task.content =content 
+        if is_done is not None:
+            task.is_done =is_done 
+        
+        task.save()
+        return UpdateTaskMutation(task=task)
+
 # タスクの削除
 class DeleteTaskMutation(relay.ClientIDMutation):
     class Input:
@@ -84,6 +112,7 @@ class Mutation(graphene.ObjectType):
     social_auth = graphql_social_auth.SocialAuth.Field()
 
     create_task = CreateTaskMutation.Field()
+    update_task = UpdateTaskMutation.Field()
     delete_task = DeleteTaskMutation.Field()
 
 
