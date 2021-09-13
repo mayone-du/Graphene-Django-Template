@@ -11,7 +11,7 @@ from graphql_relay import from_global_id
 
 from api.validation import validate_token
 
-from .models import Task, User
+from .models import Profile, Task, User
 
 
 class UserNode(DjangoObjectType):
@@ -20,8 +20,16 @@ class UserNode(DjangoObjectType):
         filter_fields = {
             'username': ['exact', 'icontains'],
             'email': ['exact', 'icontains'],
-            'is_staff': ['exact']
+            'is_staff': ['exact'],
+            'is_superuser': ['exact'],
         }
+        interfaces = (relay.Node,)
+
+
+class ProfileNode(DjangoObjectType):
+    class Meta:
+        model = Profile
+        filter_fields = ['exact', 'icontains']
         interfaces = (relay.Node,)
 
 
@@ -29,7 +37,8 @@ class TaskNode(DjangoObjectType):
     class Meta:
         model = Task
         filter_fields = {
-            'title': ['exact', 'icontains']
+            'title': ['exact', 'icontains'],
+            'content': ['exact', 'icontains'],
         }
         interfaces = (relay.Node,)
 
@@ -66,16 +75,20 @@ class Query(graphene.ObjectType):
     user = graphene.Field(UserNode, id=graphene.NonNull(graphene.ID))
     all_users = DjangoFilterConnectionField(UserNode)
 
-    @validate_token
+    request_user = graphene.Field(UserNode)
+
     def resolve_user(self, info, **kwargs):
         id = kwargs.get('id')
-        # ↓デコレーターで追加されたemailにアクセス
-        email = kwargs.get('login_user_email')
-        return get_user_model().objects.get(email=email)
-        # return get_user_model().objects.get(id=from_global_id(id)[1])
+        return get_user_model().objects.get(id=from_global_id(id)[1])
 
     def resolve_all_users(self, info, **kwargs):
         return get_user_model().objects.all()
+
+    @validate_token
+    def resolve_user(self, info):
+        # ↓デコレーターで追加されたemailにアクセス
+        email = info.context.user.email
+        return get_user_model().objects.get(email=email)
 
 class Subscription(graphene.ObjectType):
     count_seconds = graphene.Float(up_to=graphene.Int())

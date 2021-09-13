@@ -76,6 +76,8 @@ class Profile(models.Model):
     )
     # 自己紹介
     self_introduction = models.CharField(max_length=1000, null=True, blank=True)
+    def __str__(self):
+        return self.self_introduction
 
 
 # タスク

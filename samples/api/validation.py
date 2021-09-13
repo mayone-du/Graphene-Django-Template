@@ -34,7 +34,8 @@ def validate_token(function):
             # userid = id_info['sub']
 
             # キーワード引数にemailを追加
-            kwargs['login_user_email'] = id_info['email']
+            info.context.user.email = id_info['email']
+            # kwargs['login_user_email'] = id_info['email']
             return function(root, info, **kwargs)
         except ValueError:
             raise ValueError('token is invalid')
