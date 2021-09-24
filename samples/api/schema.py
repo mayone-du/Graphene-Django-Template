@@ -30,6 +30,7 @@ class ProfileNode(DjangoObjectType):
     class Meta:
         model = Profile
         filter_fields = {
+            'profile_name': ['exact', 'icontains'],
             'self_introduction': ['exact', 'icontains'],
         }
         interfaces = (relay.Node,)
@@ -43,6 +44,18 @@ class TaskNode(DjangoObjectType):
             'content': ['exact', 'icontains'],
         }
         interfaces = (relay.Node,)
+
+
+
+class UpdateProfileMutation(relay.ClientIDMutation):
+    class Input:
+        profile_id = graphene.ID(required=True)
+
+    profile = graphene.Field(ProfileNode)
+
+    def mutate_and_get_payload(self, info, **input):
+        profile = Profile.objects.get(id=from_global_id(input.get('profile_id'))[1])
+        return UpdateProfileMutation(profile=profile)
 
 # タスクの作成
 class CreateTaskMutation(relay.ClientIDMutation):

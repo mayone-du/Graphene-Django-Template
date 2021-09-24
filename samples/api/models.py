@@ -5,9 +5,14 @@ from django.core.mail import send_mail
 from django.db import models
 
 
+def upload_profile_path(instance, filename):
+    ext = filename.split('.')[-1]
+    return '/'.join(['profiles', str(instance.related_user.id)+str(".")+str(ext)])
+
 def upload_task_path(instance, filename):
     ext = filename.split('.')[-1]
     return '/'.join(['tasks', str(instance.create_user.id)+str(instance.title)+str(".")+str(ext)])
+
 
 
 class UserManager(BaseUserManager):
@@ -43,13 +48,6 @@ class UserManager(BaseUserManager):
         return user
 
 
-    def create_superuser(self, email, password):
-        user = self.create_user(email, password)
-        user.is_staff = True
-        user.is_superuser = True
-        user.save(using=self._db)
-        return user
-
 
 # ユーザー
 class User(AbstractBaseUser, PermissionsMixin):
@@ -69,16 +67,43 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 # ユーザーに1対1で紐づくプロフィール
 class Profile(models.Model):
-    related_user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        related_name='related_user',
-        on_delete=models.CASCADE
-    )
+    # 紐付いているユーザー
+    related_user = models.OneToOneField(settings.AUTH_USER_MODEL,
+                                        related_name='related_user',
+                                        on_delete=models.CASCADE)
+    # 表示名
+    profile_name = models.CharField(max_length=20)
+    # もとのGoogleアカウントのデフォルトの画像URL
+    google_image_url = models.URLField()
+    # プロフィール画像
+    profile_image = models.ImageField(blank=True,
+                                      null=True,
+                                      upload_to=upload_profile_path)
     # 自己紹介
-    self_introduction = models.CharField(max_length=1000, null=True, blank=True)
-    def __str__(self):
-        return self.self_introduction
+    self_introduction = models.CharField(max_length=200, null=True, blank=True)
+    # GitHubとTwitterのユーザーネーム
+    github_username = models.CharField(max_length=30, null=True, blank=True)
+    twitter_username = models.CharField(max_length=30, null=True, blank=True)
+    # 自分のWebサイトのURL
+    website_url = models.URLField(null=True, blank=True)
+    # フォロー機能 自分がフォローしているユーザーはプロフィールモデルから、フォローされているユーザーはユーザーモデルから逆参照で取得
+    following_users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='following_users',
+        blank=True,
+        default=[],
+    )
 
+    def __str__(self) -> str:
+        return self.profile_name
+
+
+
+class Profile(models.Model):
+    related_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name='related_user',on_delete=models.CASCADE)
+    profile_name = models.CharField(max_length=20)
+    website_url = models.URLField()
 
 # タスク
 class Task(models.Model):
