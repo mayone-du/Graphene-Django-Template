@@ -50,11 +50,21 @@ class TaskNode(DjangoObjectType):
 class UpdateProfileMutation(relay.ClientIDMutation):
     class Input:
         profile_id = graphene.ID(required=True)
+        profile_name = graphene.String(required=False)
 
     profile = graphene.Field(ProfileNode)
 
     def mutate_and_get_payload(self, info, **input):
-        profile = Profile.objects.get(id=from_global_id(input.get('profile_id'))[1])
+        profile_id = input.get('profile_id')
+        profile_name = input.get('profile_name')
+        
+        profile = Profile.objects.get(id=from_global_id(profile_id)[1])
+
+        if profile_name is not None:
+            profile.profile_name = profile_name
+
+        profile.save()
+
         return UpdateProfileMutation(profile=profile)
 
 # タスクの作成
