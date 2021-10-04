@@ -99,12 +99,6 @@ class Profile(models.Model):
 
 
 
-class Profile(models.Model):
-    related_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, related_name='related_user',on_delete=models.CASCADE)
-    profile_name = models.CharField(max_length=20)
-    website_url = models.URLField()
-
 # タスク
 class Task(models.Model):
     create_user = models.ForeignKey(
